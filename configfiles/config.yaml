@@ -1,0 +1,17 @@
+local_run: 1
+version: "1.0.0"
+app_name: "grnatm"
+port: 8001
+log:
+  name: "grnatm"
+  level: INFO
+  format: "%(asctime)-15s %(name)-15s - %(levelname)-6s : %(message)s"
+graphql:
+  url: https://spacex-production.up.railway.app/
+db:
+  connection_string: postgresql+asyncpg://myusername:mypassword@localhost:5433/postgres
+  schema: public
+  connect_args:
+    command_timeout: 30
+  log:
+    level: INFO
