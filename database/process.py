@@ -1,6 +1,7 @@
 from typing import List, Union
 import sys, inspect
 from sqlalchemy.future import select
+from sqlalchemy.dialects.sqlite import insert
 
 import models
 from database.db_models import LaunchTable, MissionTable, RocketTable
@@ -18,10 +19,12 @@ class DbClient:
         new_items = []
         for item in data:
             if 'launch_date_utc' in dir(item):
-                # TODO: Подумать. Graph возвращает строку с датой, которую не получается инсертить
+                # TODO: Убрать костыль. Graph возвращает строку с датой, которую не получается инсертить
                 item.launch_date_utc = item.launch_date_utc.utcnow()
-            new_items.append(db_model(**item.dict()))
-        self.session.add_all(new_items)
+            new_items.append(item.dict())
+        uniq_index_name = f'uniq{db_model.__name__}'
+        stmt = insert(db_model).values(new_items).on_conflict_do_nothing(index_where=(uniq_index_name, ))
+        await self.session.execute(stmt)
         await self.session.flush()
         await self.session.commit()
 
