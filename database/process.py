@@ -3,7 +3,7 @@ import sys, inspect
 from sqlalchemy.future import select
 from sqlalchemy.dialects.sqlite import insert
 
-import models
+from models import Mission, Rocket, Launch
 from database.db_models import LaunchTable, MissionTable, RocketTable
 
 
@@ -14,7 +14,7 @@ class DbClient:
         self.session = session
 
     async def insert_data(self,
-                          data: Union[List[models.Mission], List[models.Launch], List[models.Rocket]],
+                          data: Union[List[Mission], List[Launch], List[Rocket]],
                           db_model: Union[MissionTable, LaunchTable, RocketTable]):
         new_items = []
         for item in data:
@@ -28,13 +28,13 @@ class DbClient:
         await self.session.flush()
         await self.session.commit()
 
-    async def add_launches(self, launches: List[models.Launch]):
+    async def add_launches(self, launches: List[Launch]):
         await self.insert_data(launches, LaunchTable)
 
-    async def add_rockets(self, rockets: List[models.Rocket]):
+    async def add_rockets(self, rockets: List[Rocket]):
         await self.insert_data(rockets, RocketTable)
 
-    async def add_missions(self, missions: List[models.Mission]):
+    async def add_missions(self, missions: List[Mission]):
         await self.insert_data(missions, MissionTable)
 
     async def select_totals(self):

@@ -4,6 +4,7 @@ import yaml
 from easydict import EasyDict
 import inotify.adapters
 
+
 class Config:
     def __init__(self, path, files, on_load=None):
         self.inotify = inotify.adapters.Inotify()
