@@ -1,3 +1,4 @@
+from dateutil.parser import parse
 from typing import List, Union
 import sys, inspect
 from sqlalchemy.future import select
@@ -17,16 +18,19 @@ class DbClient:
                           data: Union[List[Mission], List[Launch], List[Rocket]],
                           db_model: Union[MissionTable, LaunchTable, RocketTable]):
         new_items = []
+        # TODO: Убрать костыль. Graph возвращает строку с датой, которую не получается инсертить
         for item in data:
-            if 'launch_date_utc' in dir(item):
-                # TODO: Убрать костыль. Graph возвращает строку с датой, которую не получается инсертить
-                item.launch_date_utc = item.launch_date_utc.utcnow()
+            for name, value in item.dict().items():
+                if value and name in ('launch_date_utc', 'launch_date_local', 'launch_date_unix',
+                                      'static_fire_date_unix', 'static_fire_date_utc'):
+                    setattr(item, name, getattr(item, name).replace(tzinfo=None))
             new_items.append(item.dict())
         uniq_index_name = f'uniq{db_model.__name__}'
-        stmt = insert(db_model).values(new_items).on_conflict_do_nothing(index_where=(uniq_index_name, ))
-        await self.session.execute(stmt)
-        await self.session.flush()
-        await self.session.commit()
+        if new_items:
+            stmt = insert(db_model).values(new_items).on_conflict_do_nothing(index_where=(uniq_index_name, ))
+            await self.session.execute(stmt)
+            await self.session.flush()
+            await self.session.commit()
 
     async def add_launches(self, launches: List[Launch]):
         await self.insert_data(launches, LaunchTable)
