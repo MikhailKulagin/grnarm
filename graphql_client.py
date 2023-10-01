@@ -21,7 +21,7 @@ class AsyncGraphQLClient(AsyncBaseClient):
         params = {"limit": 100, "offset": 0}
         res = []
         while True:
-            post_res = self._post(url="", body={"query": body, "variables": params})
+            post_res = await self._post(url="", body={"query": body, "variables": params})
             if 'data' not in post_res:
                 break
             data = post_res['data']
@@ -34,9 +34,6 @@ class AsyncGraphQLClient(AsyncBaseClient):
             params['limit'] = params['limit'] + 100
             params['offset'] = params['offset'] + 100
         return res
-
-    async def get_data_pagination(self):
-        pass
 
     async def get_launches_graph(self) -> List[Launch]:
         body = """

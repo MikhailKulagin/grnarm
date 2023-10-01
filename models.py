@@ -56,3 +56,13 @@ class Rocket(BaseModel):
     class Config:
         validate_assignment = True
         orm_mode = True
+
+
+class DefaultResponse(BaseModel):
+    result: bool
+
+
+class TotalResponse(BaseModel):
+    LaunchTable: int
+    MissionTable: int
+    RocketTable: int

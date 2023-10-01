@@ -12,16 +12,16 @@ class AsyncBaseClient:
         self.base_url = host_cfg.url
         self.timeout = host_cfg.get('timeout', 5.0)
 
-    def _post(self, url, body, timeout=None):
-        with httpx.Client(verify=False,
+    async def _post(self, url, body, timeout=None):
+        async with httpx.AsyncClient(verify=False,
                           base_url=self.base_url,
                           timeout=timeout or self.timeout) as client:
             log.info(f"POST {self.base_url}{url}")
             try:
-                response = client.post(url,
-                                       json=body,
-                                       headers={'content-type': 'application/json'},
-                                       )
+                response = await client.post(url,
+                                             json=body,
+                                             headers={'content-type': 'application/json'},
+                                             )
             except httpx.HTTPError as err:
                 raise exceptions.HTTPError(str(err))
             log.debug(f"{response.status_code}")
